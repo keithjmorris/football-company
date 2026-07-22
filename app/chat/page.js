@@ -11,7 +11,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 
-const ALLOWED_DOMAINS = ['xenomorph.com', 'newmodel.vc', 'wellsmaltings.org.uk'];
+const ALLOWED_DOMAINS = ['xenomorph.com', 'newmodel.vc'];
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
@@ -87,7 +87,7 @@ const q = query(collection(db, 'messages-football'), orderBy('createdAt', 'asc')
           <div>
             <h1 className="site-title">Company Chat</h1>
             <p className="site-subtitle">
-              {authorised ? `Chatting as ${name}` : 'World Cup 2026'}
+              {authorised ? `Chatting as ${name}` : '2026/27 Season'}
             </p>
           </div>
         </div>
@@ -116,8 +116,7 @@ const q = query(collection(db, 'messages-football'), orderBy('createdAt', 'asc')
         </div>
 
         {!authorised ? (
-          <div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '0.75rem' }}>
-            <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>
+<div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '0.75rem', maxWidth: '700px', margin: '0 auto', padding: '0.75rem 1rem' }}>            <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>
               Enter your work email to join the chat:
             </p>
             <form onSubmit={handleEmailSubmit} className="chat-input-row">
