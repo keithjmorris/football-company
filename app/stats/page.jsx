@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { TEAMS } from '@/lib/teams';
-import TeamSelector from '@/components/TeamSelector';
+import { useFavourites } from '@/lib/FavouritesContext';
 
 function StatBadge({ value, type }) {
   if (!value) return <span className="stat-zero">—</span>;
@@ -82,7 +81,8 @@ function PlayerRow({ player, isExpanded, onToggle }) {
 }
 
 export default function StatsPage() {
-  const [selectedTeam, setSelectedTeam] = useState('all');
+  const { favourites } = useFavourites();
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const [competition, setCompetition] = useState('all');
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -90,16 +90,20 @@ export default function StatsPage() {
   const [expanded, setExpanded] = useState(null);
   const [sortBy, setSortBy] = useState('apps');
 
+  // Auto-select first favourite
   useEffect(() => {
-    if (selectedTeam === 'all') {
-      setPlayers([]);
-      return;
+    if (favourites.length > 0 && !selectedTeam) {
+      setSelectedTeam(favourites[0]);
     }
+  }, [favourites]);
+
+  useEffect(() => {
+    if (!selectedTeam) return;
     setLoading(true);
     setError(null);
     setExpanded(null);
 
-    fetch(`/api/stats?teamId=${selectedTeam}&competition=${competition}`)
+    fetch(`/api/stats?teamId=${selectedTeam.id}&competition=${competition}`)
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
@@ -108,8 +112,6 @@ export default function StatsPage() {
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
   }, [selectedTeam, competition]);
-
-  const team = TEAMS.find(t => String(t.id) === selectedTeam);
 
   const sorted = [...players].sort((a, b) => {
     if (sortBy === 'apps') return (b.starts + b.subApps) - (a.starts + a.subApps);
@@ -125,7 +127,7 @@ export default function StatsPage() {
       <header className="site-header">
         <div className="header-inner">
           <div className="header-crests">
-            {TEAMS.map(t => (
+            {favourites.map(t => (
               <img key={t.id} src={t.crest} alt={t.shortName} className="header-crest" />
             ))}
           </div>
@@ -136,103 +138,101 @@ export default function StatsPage() {
         </div>
       </header>
 
-      <TeamSelector
-        selectedTeam={selectedTeam}
-        onChange={val => {
-          setSelectedTeam(val);
-          setPlayers([]);
-        }}
-      />
+      {/* Team tabs */}
+      <div className="stats-team-tabs">
+        {favourites.map(t => (
+          <button
+            key={t.id}
+            className={`stats-team-tab ${selectedTeam?.id === t.id ? 'active' : ''}`}
+            onClick={() => {
+              setSelectedTeam(t);
+              setPlayers([]);
+              setExpanded(null);
+            }}
+          >
+            <img src={t.crest} alt="" className="stats-tab-crest" />
+            <span>{t.shortName}</span>
+          </button>
+        ))}
+      </div>
 
-      {selectedTeam === 'all' ? (
-        <div className="content">
-          <p className="state-msg">Select a team above to view player statistics.</p>
+      {selectedTeam && (
+        <div className="stats-controls">
+          <div className="stats-team-name">
+            <img src={selectedTeam.crest} alt="" className="stats-team-crest" />
+            <span>{selectedTeam.name}</span>
+          </div>
+          <div className="stats-toggles">
+            <button
+              className={`stats-toggle ${competition === 'all' ? 'active' : ''}`}
+              onClick={() => setCompetition('all')}
+            >All</button>
+            <button
+              className={`stats-toggle ${competition === 'PL' ? 'active' : ''}`}
+              onClick={() => setCompetition('PL')}
+            >League</button>
+          </div>
         </div>
-      ) : (
-        <>
-          <div className="stats-controls">
-            <div className="stats-team-name">
-              {team?.crest && <img src={team.crest} alt="" className="stats-team-crest" />}
-              <span>{team?.name}</span>
-            </div>
-            <div className="stats-toggles">
-              <button
-                className={`stats-toggle ${competition === 'all' ? 'active' : ''}`}
-                onClick={() => setCompetition('all')}
-              >
-                All
-              </button>
-              <button
-                className={`stats-toggle ${competition === 'PL' ? 'active' : ''}`}
-                onClick={() => setCompetition('PL')}
-              >
-                League
-              </button>
-            </div>
-          </div>
-
-          <div className="content">
-            {loading && (
-              <p className="state-msg">Loading player stats… this may take a moment on first load.</p>
-            )}
-            {error && <p className="state-msg error">Could not load stats: {error}</p>}
-            {!loading && !error && players.length === 0 && (
-              <p className="state-msg">No stats available yet — check back once matches have been played.</p>
-            )}
-            {!loading && !error && players.length > 0 && (
-              <>
-                <div className="sort-controls">
-                  <span className="sort-label">Sort by:</span>
-                  {[
-                    { key: 'apps', label: 'Apps' },
-                    { key: 'goals', label: 'Goals' },
-                    { key: 'assists', label: 'Assists' },
-                    { key: 'minutes', label: 'Minutes' },
-                    { key: 'cards', label: 'Cards' },
-                  ].map(s => (
-                    <button
-                      key={s.key}
-                      className={`sort-btn ${sortBy === s.key ? 'active' : ''}`}
-                      onClick={() => setSortBy(s.key)}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="stats-table-wrapper">
-                  <table className="stats-table">
-                    <thead>
-                      <tr>
-                        <th className="player-name-col">Player</th>
-                        <th title="Appearances">App</th>
-                        <th title="Starts">Sta</th>
-                        <th title="Sub appearances">Sub</th>
-                        <th title="Minutes played">Min</th>
-                        <th title="Goals">⚽</th>
-                        <th title="Assists">🅰️</th>
-                        <th title="Yellow cards">🟨</th>
-                        <th title="Red cards">🟥</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sorted.map(player => (
-                        <PlayerRow
-                          key={player.id}
-                          player={player}
-                          isExpanded={expanded === player.id}
-                          onToggle={() => setExpanded(expanded === player.id ? null : player.id)}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </div>
-        </>
       )}
+
+      <div className="content">
+        {loading && <p className="state-msg">Loading player stats… this may take a moment on first load.</p>}
+        {error && <p className="state-msg error">Could not load stats: {error}</p>}
+        {!loading && !error && players.length === 0 && (
+          <p className="state-msg">No stats available yet — check back once matches have been played.</p>
+        )}
+        {!loading && !error && players.length > 0 && (
+          <>
+            <div className="sort-controls">
+              <span className="sort-label">Sort by:</span>
+              {[
+                { key: 'apps', label: 'Apps' },
+                { key: 'goals', label: 'Goals' },
+                { key: 'assists', label: 'Assists' },
+                { key: 'minutes', label: 'Minutes' },
+                { key: 'cards', label: 'Cards' },
+              ].map(s => (
+                <button
+                  key={s.key}
+                  className={`sort-btn ${sortBy === s.key ? 'active' : ''}`}
+                  onClick={() => setSortBy(s.key)}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="stats-table-wrapper">
+              <table className="stats-table">
+                <thead>
+                  <tr>
+                    <th className="player-name-col">Player</th>
+                    <th title="Appearances">App</th>
+                    <th title="Starts">Sta</th>
+                    <th title="Sub appearances">Sub</th>
+                    <th title="Minutes played">Min</th>
+                    <th title="Goals">⚽</th>
+                    <th title="Assists">🅰️</th>
+                    <th title="Yellow cards">🟨</th>
+                    <th title="Red cards">🟥</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sorted.map(player => (
+                    <PlayerRow
+                      key={player.id}
+                      player={player}
+                      isExpanded={expanded === player.id}
+                      onToggle={() => setExpanded(expanded === player.id ? null : player.id)}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </div>
     </main>
   );
 }

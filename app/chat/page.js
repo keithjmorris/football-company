@@ -60,8 +60,8 @@ export default function ChatPage() {
           <div className="header-inner">
             <span className="trophy">💬</span>
             <div>
-              <h1 className="site-title">Family Chat</h1>
-              <p className="site-subtitle">World Cup 2026</p>
+              <h1 className="site-title">Chat</h1>
+              <p className="site-subtitle">2026/27 Season</p>
             </div>
           </div>
         </header>
