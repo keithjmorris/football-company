@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useFavourites } from '@/lib/FavouritesContext';
+import MatchStats from '@/components/MatchStats';
 
 function StatBadge({ value, type }) {
   if (!value) return <span className="stat-zero">—</span>;
@@ -15,6 +16,101 @@ function StatBadge({ value, type }) {
     <span className="stat-badge" style={{ background: colours[type] || '#6b7280' }}>
       {value}
     </span>
+  );
+}
+
+function FormBadge({ result }) {
+  const colours = { W: '#16a34a', D: '#eab308', L: '#dc2626' };
+  return (
+    <span className="form-badge" style={{ background: colours[result] || '#6b7280' }}>
+      {result}
+    </span>
+  );
+}
+
+function TeamSeasonStats({ stats, team }) {
+  if (!stats) return null;
+  return (
+    <div className="team-season-stats">
+      <div className="team-season-header">
+        <img src={team?.crest} alt="" className="team-season-crest" />
+        <h2 className="team-season-title">Season Summary</h2>
+        <div className="team-form">
+          {stats.form?.map((r, i) => <FormBadge key={i} result={r} />)}
+        </div>
+      </div>
+
+      <div className="team-stats-grid">
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.played}</span>
+          <span className="team-stat-label">Played</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value" style={{ color: '#16a34a' }}>{stats.wins}</span>
+          <span className="team-stat-label">Won</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value" style={{ color: '#eab308' }}>{stats.draws}</span>
+          <span className="team-stat-label">Drawn</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value" style={{ color: '#dc2626' }}>{stats.losses}</span>
+          <span className="team-stat-label">Lost</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.goalsFor}</span>
+          <span className="team-stat-label">GF</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.goalsAgainst}</span>
+          <span className="team-stat-label">GA</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.goalDifference > 0 ? `+${stats.goalDifference}` : stats.goalDifference}</span>
+          <span className="team-stat-label">GD</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.cleanSheets}</span>
+          <span className="team-stat-label">Clean Sheets</span>
+        </div>
+      </div>
+
+      <div className="team-stats-divider">Performance Averages</div>
+      <div className="team-stats-grid">
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.avgPossession}%</span>
+          <span className="team-stat-label">Possession</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.avgShotsOnGoal}</span>
+          <span className="team-stat-label">Shots on Target</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.avgShots}</span>
+          <span className="team-stat-label">Total Shots</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.avgSaves}</span>
+          <span className="team-stat-label">Saves</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.avgCorners}</span>
+          <span className="team-stat-label">Corners</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.avgFouls}</span>
+          <span className="team-stat-label">Fouls</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value" style={{ color: '#eab308' }}>{stats.totalYellowCards}</span>
+          <span className="team-stat-label">Yellow Cards</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value" style={{ color: '#dc2626' }}>{stats.totalRedCards}</span>
+          <span className="team-stat-label">Red Cards</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -85,12 +181,12 @@ export default function StatsPage() {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [competition, setCompetition] = useState('all');
   const [players, setPlayers] = useState([]);
+  const [teamStats, setTeamStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(null);
   const [sortBy, setSortBy] = useState('apps');
 
-  // Auto-select first favourite
   useEffect(() => {
     if (favourites.length > 0 && !selectedTeam) {
       setSelectedTeam(favourites[0]);
@@ -102,12 +198,14 @@ export default function StatsPage() {
     setLoading(true);
     setError(null);
     setExpanded(null);
+    setTeamStats(null);
 
     fetch(`/api/stats?teamId=${selectedTeam.id}&competition=${competition}`)
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
         setPlayers(data.players || []);
+        setTeamStats(data.teamStats || null);
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
@@ -144,13 +242,27 @@ export default function StatsPage() {
           <button
             key={t.id}
             className={`stats-team-tab ${selectedTeam?.id === t.id ? 'active' : ''}`}
+            style={selectedTeam?.id === t.id ? { borderBottomColor: t.color, color: t.color } : {}}
             onClick={() => {
               setSelectedTeam(t);
               setPlayers([]);
+              setTeamStats(null);
               setExpanded(null);
             }}
           >
-            <img src={t.crest} alt="" className="stats-tab-crest" />
+            <div style={{ width: 32, height: 32, flexShrink: 0, overflow: 'hidden' }}>
+              <img
+                src={t.crest}
+                alt=""
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  maxWidth: 32,
+                  maxHeight: 32,
+                }}
+              />
+            </div>
             <span>{t.shortName}</span>
           </button>
         ))}
@@ -176,13 +288,24 @@ export default function StatsPage() {
       )}
 
       <div className="content">
-        {loading && <p className="state-msg">Loading player stats… this may take a moment on first load.</p>}
+        {loading && <p className="state-msg">Loading player stats…</p>}
         {error && <p className="state-msg error">Could not load stats: {error}</p>}
-        {!loading && !error && players.length === 0 && (
-          <p className="state-msg">No stats available yet — check back once matches have been played.</p>
+        {!loading && !error && players.length === 0 && selectedTeam && (
+          <div className="state-msg">
+            <p>No stats available yet.</p>
+            <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+              {selectedTeam?.competition === 'ELC'
+                ? `${selectedTeam.shortName} stats will be available once the Championship season starts on 9th August.`
+                : `${selectedTeam?.shortName} stats will be available once the season starts.`
+              }
+            </p>
+          </div>
         )}
+
         {!loading && !error && players.length > 0 && (
           <>
+            <TeamSeasonStats stats={teamStats} team={selectedTeam} />
+
             <div className="sort-controls">
               <span className="sort-label">Sort by:</span>
               {[
