@@ -13,7 +13,20 @@ const firebaseConfig = {
 const FOOTBALL_DATA_KEY = "f60422be72c645dfb2f1bade64df2999";
 
 const TEAMS = [
-  { id: 341, competition: 'PL', shortName: 'Leeds United' },
+  { id: 1044, competition: 'PL', shortName: 'Bournemouth' },
+  { id: 58,   competition: 'PL', shortName: 'Aston Villa' },
+  { id: 402,  competition: 'PL', shortName: 'Brentford' },
+  { id: 397,  competition: 'PL', shortName: 'Brighton' },
+  { id: 1076, competition: 'PL', shortName: 'Coventry' },
+  { id: 354,  competition: 'PL', shortName: 'Crystal Palace' },
+  { id: 62,   competition: 'PL', shortName: 'Everton' },
+  { id: 63,   competition: 'PL', shortName: 'Fulham' },
+  { id: 322,  competition: 'PL', shortName: 'Hull City' },
+  { id: 349,  competition: 'PL', shortName: 'Ipswich' },
+  { id: 67,   competition: 'PL', shortName: 'Newcastle' },
+  { id: 351,  competition: 'PL', shortName: 'Nottm Forest' },
+  { id: 71,   competition: 'PL', shortName: 'Sunderland' },
+  { id: 73,   competition: 'PL', shortName: 'Tottenham' },
 ];
 
 const app = initializeApp(firebaseConfig);

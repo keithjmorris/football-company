@@ -280,9 +280,15 @@ export default function StatsPage() {
               onClick={() => setCompetition('all')}
             >All</button>
             <button
-              className={`stats-toggle ${competition === 'PL' ? 'active' : ''}`}
-              onClick={() => setCompetition('PL')}
+              className={`stats-toggle ${competition === selectedTeam?.competition ? 'active' : ''}`}
+              onClick={() => setCompetition(selectedTeam?.competition || 'PL')}
             >League</button>
+            {selectedTeam?.competition === 'PL' && (
+              <button
+                className={`stats-toggle ${competition === 'CL' ? 'active' : ''}`}
+                onClick={() => setCompetition('CL')}
+              >Champions League</button>
+            )}
           </div>
         </div>
       )}
