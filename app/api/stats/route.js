@@ -1,4 +1,4 @@
-import { TEAMS } from '@/lib/allTeams';
+import { ALL_TEAMS as TEAMS } from '@/lib/allTeams';
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
