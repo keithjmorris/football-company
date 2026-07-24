@@ -13,9 +13,7 @@ const firebaseConfig = {
 const FOOTBALL_DATA_KEY = "f60422be72c645dfb2f1bade64df2999";
 
 const TEAMS = [
-  { id: 57, competition: 'PL', shortName: 'Arsenal' },
-  { id: 61, competition: 'PL', shortName: 'Chelsea' },
-  { id: 60, competition: 'ELC', shortName: 'Bolton' },
+  { id: 341, competition: 'PL', shortName: 'Leeds United' },
 ];
 
 const app = initializeApp(firebaseConfig);
