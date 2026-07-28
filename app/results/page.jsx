@@ -97,8 +97,8 @@ export default function ResultsPage() {
       try {
         const teamIds = favourites.map(t => t.id);
         const url = selectedTeam === 'all'
-          ? `/api/matches?teamIds=${teamIds.join(',')}&status=FINISHED`
-          : `/api/matches?teamId=${selectedTeam}&status=FINISHED`;
+  ? `/api/matches?teamIds=${teamIds.join(',')}&status=FINISHED&season=2025`
+  : `/api/matches?teamId=${selectedTeam}&status=FINISHED&season=2025`;
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch results');
         const data = await res.json();
@@ -137,6 +137,7 @@ export default function ResultsPage() {
 
       <TeamSelector
         selectedTeam={selectedTeam}
+        showAll={false}
         onChange={val => {
           setSelectedTeam(val);
           setLoading(true);
