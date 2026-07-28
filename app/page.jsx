@@ -27,7 +27,8 @@ function LiveMatchCard({ match }) {
   const awayScore = score?.fullTime?.away ?? 0;
   const halfTimeHome = score?.halfTime?.home;
   const halfTimeAway = score?.halfTime?.away;
-  const isHome = id => TEAMS.some(t => t.id === id);
+  const { favourites } = useFavourites();
+const isHome = id => favourites.some(t => t.id === id);
 
   const homeGoals = goals?.filter(g => g.team?.id === homeTeam?.id) || [];
   const awayGoals = goals?.filter(g => g.team?.id === awayTeam?.id) || [];
@@ -211,7 +212,8 @@ function LiveMatchCard({ match }) {
 }
 
 function UpcomingMatchCard({ match }) {
-  const trackedIds = new Set(TEAMS.map(t => t.id));
+  const { favourites } = useFavourites();
+const trackedIds = new Set(favourites.map(t => t.id));
   const homeTracked = trackedIds.has(match.homeTeam?.id);
   const awayTracked = trackedIds.has(match.awayTeam?.id);
 
@@ -312,8 +314,8 @@ const [todayRes, upcomingRes] = await Promise.all([
       <header className="site-header">
         <div className="header-inner">
           <div className="header-crests">
-            {TEAMS.map(t => (
-              <img key={t.id} src={t.crest} alt={t.shortName} className="header-crest" />
+            {favourites.map(t => (
+  <img key={t.id} src={t.crest} alt={t.shortName} className="header-crest" />
             ))}
           </div>
           <div>
