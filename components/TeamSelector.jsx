@@ -2,7 +2,7 @@
 
 import { useFavourites } from '@/lib/FavouritesContext';
 
-export default function TeamSelector({ selectedTeam, onChange }) {
+export default function TeamSelector({ selectedTeam, onChange, showAll = true }) {
   const { favourites, updateFavourites } = useFavourites();
 
   if (favourites.length === 0) return null;
@@ -16,6 +16,7 @@ export default function TeamSelector({ selectedTeam, onChange }) {
         All
       </button>
       {favourites.map(t => (
+        {showAll && (
         <button
           key={t.id}
           className={`team-selector-btn ${selectedTeam === String(t.id) ? 'team-selector-active' : ''}`}
@@ -25,6 +26,7 @@ export default function TeamSelector({ selectedTeam, onChange }) {
           <img src={t.crest} alt={t.shortName} className="team-selector-crest" />
           <span className="team-selector-name">{t.shortName}</span>
         </button>
+        )}
       ))}
     </div>
   );
