@@ -260,8 +260,8 @@ export default function FixturesPage() {
 
       // Build URL based on selection
       const baseParams = selectedTeam === 'all'
-        ? `teamIds=${teamIds.join(',')}`
-        : `teamId=${selectedTeam}`;
+  ? `teamIds=${teamIds.join(',')}&season=2026`
+  : `teamId=${selectedTeam}&season=2026`;
 
       const [todayRes, upcomingRes] = await Promise.all([
         fetch(`/api/matches?${baseParams}&dateFrom=${today}&dateTo=${today}`),
