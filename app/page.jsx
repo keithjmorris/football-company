@@ -251,7 +251,7 @@ export default function FixturesPage() {
   const [upcomingMatches, setUpcomingMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedTeam, setSelectedTeam] = useState('all');
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const intervalRef = useRef(null);
 
   async function fetchMatches() {
@@ -297,6 +297,12 @@ const [todayRes, upcomingRes] = await Promise.all([
     return () => clearInterval(intervalRef.current);
   }, [selectedTeam]);
 
+  useEffect(() => {
+  if (favourites.length > 0 && !selectedTeam) {
+    setSelectedTeam(String(favourites[0].id));
+  }
+}, [favourites]);
+
   const grouped = upcomingMatches.reduce((acc, match) => {
     const date = match.utcDate.split('T')[0];
     if (!acc[date]) acc[date] = [];
@@ -322,6 +328,7 @@ const [todayRes, upcomingRes] = await Promise.all([
 
       <TeamSelector
         selectedTeam={selectedTeam}
+        
         onChange={val => {
           setSelectedTeam(val);
           setLoading(true);
