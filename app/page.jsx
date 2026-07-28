@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { TEAMS } from '@/lib/teams';
+import { useFavourites } from '@/lib/FavouritesContext';
 import TeamSelector from '@/components/TeamSelector';
 
 const LIVE_STATUSES = ['IN_PLAY', 'PAUSED', 'EXTRA_TIME', 'PENALTY_SHOOTOUT'];
@@ -253,6 +253,7 @@ export default function FixturesPage() {
   const [error, setError] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState('all');
   const intervalRef = useRef(null);
+  const { favourites } = useFavourites();
 
   async function fetchMatches() {
     try {
