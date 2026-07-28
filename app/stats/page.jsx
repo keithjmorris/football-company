@@ -193,24 +193,6 @@ export default function StatsPage() {
     }
   }, [favourites]);
 
-  useEffect(() => {
-    if (!selectedTeam) return;
-    setLoading(true);
-    setError(null);
-    setExpanded(null);
-    setTeamStats(null);
-
-    fetch(`/api/stats?teamId=${selectedTeam.id}&competition=${competition}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.error) throw new Error(data.error);
-        setPlayers(data.players || []);
-        setTeamStats(data.teamStats || null);
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [selectedTeam, competition]);
-
   const sorted = [...players].sort((a, b) => {
     if (sortBy === 'apps') return (b.starts + b.subApps) - (a.starts + a.subApps);
     if (sortBy === 'goals') return b.goals - a.goals;
