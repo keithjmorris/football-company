@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useFavourites } from '@/lib/FavouritesContext';
-
 function StatBadge({ value, type }) {
   if (!value) return <span className="stat-zero">—</span>;
   const colours = {
@@ -72,11 +71,15 @@ function TeamSeasonStats({ stats, team }) {
           <span className="team-stat-label">Clean Sheets</span>
         </div>
       </div>
-      <div className="team-stats-divider">Performance Averages</div>
+            <div className="team-stats-divider">Performance Averages</div>
       <div className="team-stats-grid">
         <div className="team-stat-card">
           <span className="team-stat-value">{stats.avgPossession}%</span>
           <span className="team-stat-label">Possession</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.avgXg}</span>
+          <span className="team-stat-label">xG</span>
         </div>
         <div className="team-stat-card">
           <span className="team-stat-value">{stats.avgShotsOnGoal}</span>
@@ -85,6 +88,18 @@ function TeamSeasonStats({ stats, team }) {
         <div className="team-stat-card">
           <span className="team-stat-value">{stats.avgShots}</span>
           <span className="team-stat-label">Total Shots</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.avgPasses}</span>
+          <span className="team-stat-label">Passes</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.avgPassAccuracy}%</span>
+          <span className="team-stat-label">Pass Accuracy</span>
+        </div>
+        <div className="team-stat-card">
+          <span className="team-stat-value">{stats.avgTackles}</span>
+          <span className="team-stat-label">Tackles</span>
         </div>
         <div className="team-stat-card">
           <span className="team-stat-value">{stats.avgSaves}</span>
@@ -138,40 +153,48 @@ function PlayerRow({ player, isExpanded, onToggle }) {
           <td colSpan="10">
             <div className="player-matches">
               <table className="player-match-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Opponent</th>
-                    <th>H/A</th>
-                    <th>Score</th>
-                    <th>Comp</th>
-                    <th>Mins</th>
-                    <th>Role</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {player.matches
-                    .sort((a, b) => new Date(a.date) - new Date(b.date))
-                    .map((m, i) => (
-                      <tr key={i}>
-                        <td>{(() => {
-                          try {
-                            const cleaned = String(m.date).replace(/(\d+)(st|nd|rd|th)/i, '$1').trim();
-                            const withYear = cleaned.includes('2025') || cleaned.includes('2026') ? cleaned : cleaned + ' 2025';
-                            const d = new Date(withYear);
-                            return isNaN(d.getTime()) ? m.date : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-                          } catch { return m.date; }
-                        })()}</td>
-                        <td>{m.opponent}</td>
-                        <td>{m.homeAway}</td>
-                        <td>{m.score}</td>
-                        <td>{m.competition}</td>
-                        <td>{Math.round(m.minutesPlayed)}'</td>
-                        <td>{m.started ? 'Start' : `Sub ${m.cameOnMinute}'`}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Opponent</th>
+      <th>H/A</th>
+      <th>Score</th>
+      <th>Comp</th>
+      <th>Mins</th>
+      <th>Role</th>
+      <th>xG</th>
+      <th>Passes</th>
+      <th>Pass%</th>
+      <th>Tackles</th>
+    </tr>
+  </thead>
+  <tbody>
+    {player.matches
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .map((m, i) => (
+        <tr key={i}>
+          <td>{(() => {
+            try {
+              const cleaned = String(m.date).replace(/(\d+)(st|nd|rd|th)/i, '$1').trim();
+              const withYear = cleaned.includes('2025') || cleaned.includes('2026') ? cleaned : cleaned + ' 2025';
+              const d = new Date(withYear);
+              return isNaN(d.getTime()) ? m.date : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            } catch { return m.date; }
+          })()}</td>
+          <td>{m.opponent}</td>
+          <td>{m.homeAway}</td>
+          <td>{m.score}</td>
+          <td>{m.competition}</td>
+          <td>{Math.round(m.minutesPlayed)}'</td>
+          <td>{m.started ? 'Start' : `Sub ${m.cameOnMinute}'`}</td>
+          <td>{m.xg ? m.xg.toFixed(2) : '—'}</td>
+          <td>{m.passes || '—'}</td>
+          <td>{m.passAccuracy ? `${Math.round(m.passAccuracy)}%` : '—'}</td>
+          <td>{m.tackles || '—'}</td>
+        </tr>
+      ))}
+  </tbody>
+</table>
             </div>
           </td>
         </tr>
@@ -179,7 +202,6 @@ function PlayerRow({ player, isExpanded, onToggle }) {
     </>
   );
 }
-
 function aggregateTeamStats(teamMatchStats) {
   const count = teamMatchStats.length;
   if (count === 0) return null;
@@ -200,12 +222,17 @@ function aggregateTeamStats(teamMatchStats) {
     fouls: acc.fouls + m.fouls,
     yellowCards: acc.yellowCards + m.yellowCards,
     redCards: acc.redCards + m.redCards,
+    xg: acc.xg + (m.xg || 0),
+    totalPasses: acc.totalPasses + (m.totalPasses || 0),
+    passAccuracy: acc.passAccuracy + (m.passAccuracy || 0),
+    tackles: acc.tackles + (m.tackles || 0),
   }), {
     wins: 0, draws: 0, losses: 0,
     goalsFor: 0, goalsAgainst: 0, cleanSheets: 0,
     possession: 0, shotsOnGoal: 0, shotsOffGoal: 0,
     shots: 0, saves: 0, corners: 0, fouls: 0,
     yellowCards: 0, redCards: 0,
+    xg: 0, totalPasses: 0, passAccuracy: 0, tackles: 0,
   });
 
   const form = [...teamMatchStats]
@@ -226,11 +253,15 @@ function aggregateTeamStats(teamMatchStats) {
     points: totals.wins * 3 + totals.draws,
     pointsPerGame: ((totals.wins * 3 + totals.draws) / count).toFixed(2),
     avgPossession: Math.round(totals.possession / count),
+    avgXg: (totals.xg / count).toFixed(2),
     avgShotsOnGoal: (totals.shotsOnGoal / count).toFixed(1),
     avgShots: (totals.shots / count).toFixed(1),
     avgSaves: (totals.saves / count).toFixed(1),
     avgCorners: (totals.corners / count).toFixed(1),
     avgFouls: (totals.fouls / count).toFixed(1),
+    avgPasses: Math.round(totals.totalPasses / count),
+    avgPassAccuracy: Math.round(totals.passAccuracy / count),
+    avgTackles: Math.round(totals.tackles / count),
     totalYellowCards: totals.yellowCards,
     totalRedCards: totals.redCards,
     form,
@@ -239,7 +270,7 @@ function aggregateTeamStats(teamMatchStats) {
 
 export default function StatsPage() {
   const { favourites } = useFavourites();
-  const [selectedTeam, setSelectedTeam] = useState(null);
+const [selectedTeam, setSelectedTeam] = useState(null);
   const [season, setSeason] = useState('2026');
   const [competition, setCompetition] = useState('all');
   const [players, setPlayers] = useState([]);
@@ -251,10 +282,10 @@ export default function StatsPage() {
   const rawDataCache = useRef({});
 
   useEffect(() => {
-    if (favourites.length > 0 && !selectedTeam) {
-      setSelectedTeam(favourites[0]);
-    }
-  }, [favourites]);
+  if (favourites.length > 0 && !selectedTeam) {
+    setSelectedTeam(favourites[0]);
+  }
+}, [favourites]);
 
   useEffect(() => {
     if (!selectedTeam) return;
@@ -378,23 +409,23 @@ export default function StatsPage() {
       <header className="site-header">
         <div className="header-inner">
           <div className="header-crests">
-            {favourites.map(t => (
+            {TEAMS.map(t => (
               <img key={t.id} src={t.crest} alt={t.shortName} className="header-crest" />
             ))}
           </div>
           <div>
-            <h1 className="site-title">Player Stats</h1>
-            <p className="site-subtitle">2026/27 Season</p>
+            <h1 className="site-title">Stats</h1>
+            <p className="site-subtitle">Season</p>
           </div>
         </div>
       </header>
 
       <div className="stats-team-tabs">
-        {favourites.map(t => (
+        {TEAMS.map(t => (
           <button
             key={t.id}
             className={`stats-team-tab ${selectedTeam?.id === t.id ? 'active' : ''}`}
-            style={selectedTeam?.id === t.id ? { borderBottomColor: t.color, color: 'white' } : {}}
+            style={selectedTeam?.id === t.id ? { borderBottomColor: t.color, color: t.color } : {}}
             onClick={() => {
               setSelectedTeam(t);
               setPlayers([]);
@@ -435,9 +466,8 @@ export default function StatsPage() {
                 onClick={() => setCompetition('all')}
               >All</button>
               <button
-                className={`stats-toggle ${competition === 'LEAGUE' ? 'active' : ''}`}
-                onClick={() => setCompetition('LEAGUE')}
-              >League</button>
+                className={`stats-toggle ${competition === selectedTeam?.competition ? 'active' : ''}`}
+onClick={() => setCompetition('LEAGUE')}              >League</button>
               {selectedTeam?.competition === 'PL' && (
                 <button
                   className={`stats-toggle ${competition === 'CL' ? 'active' : ''}`}
@@ -457,7 +487,9 @@ export default function StatsPage() {
             <p>No stats available yet for {season === '2026' ? '2026/27' : '2025/26'}.</p>
             <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
               {season === '2026'
-                ? `${selectedTeam?.shortName} stats will be available once the season starts.`
+                ? selectedTeam?.competition === 'ELC'
+                  ? `${selectedTeam.shortName} stats will be available once the Championship season starts on 9th August.`
+                  : `${selectedTeam?.shortName} stats will be available once the 2026/27 season starts.`
                 : `No 2025/26 stats available for ${selectedTeam.shortName}.`
               }
             </p>
