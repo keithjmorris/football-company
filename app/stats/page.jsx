@@ -270,7 +270,7 @@ function aggregateTeamStats(teamMatchStats) {
 
 export default function StatsPage() {
   const { favourites } = useFavourites();
-const [selectedTeam, setSelectedTeam] = useState(null);
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const [season, setSeason] = useState('2026');
   const [competition, setCompetition] = useState('all');
   const [players, setPlayers] = useState([]);
@@ -409,7 +409,7 @@ const [selectedTeam, setSelectedTeam] = useState(null);
       <header className="site-header">
         <div className="header-inner">
           <div className="header-crests">
-            {TEAMS.map(t => (
+            {favourites.map(t => (
               <img key={t.id} src={t.crest} alt={t.shortName} className="header-crest" />
             ))}
           </div>
@@ -421,7 +421,7 @@ const [selectedTeam, setSelectedTeam] = useState(null);
       </header>
 
       <div className="stats-team-tabs">
-        {TEAMS.map(t => (
+        {favourites.map(t => (
           <button
             key={t.id}
             className={`stats-team-tab ${selectedTeam?.id === t.id ? 'active' : ''}`}
