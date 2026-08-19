@@ -1,5 +1,5 @@
 import { TEAM_ID_MAP, LEAGUE_IDS, convertMatch, fetchHighlightly } from '@/lib/highlightly';
-import { TEAMS } from '@/lib/teams';
+import { ALL_TEAMS as TEAMS } from '@/lib/allTeams';
 
 function getCompCode(leagueId) {
   return Object.entries(LEAGUE_IDS).find(([, id]) => id === leagueId)?.[0] || 'UNKNOWN';

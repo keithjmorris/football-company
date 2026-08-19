@@ -1,5 +1,5 @@
 import { LEAGUE_IDS, TEAM_ID_MAP, fetchHighlightly } from '@/lib/highlightly';
-import { TEAMS } from '@/lib/teams';
+import { ALL_TEAMS as TEAMS } from '@/lib/allTeams';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
