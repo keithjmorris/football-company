@@ -116,7 +116,8 @@ const q = query(collection(db, 'messages-football'), orderBy('createdAt', 'asc')
         </div>
 
         {!authorised ? (
-<div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '0.75rem', maxWidth: '700px', margin: '0 auto', padding: '0.75rem 1rem' }}>            <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>
+<div style={{ borderTop: '1px solid var(--card-border)', maxWidth: '700px', margin: '0 auto', padding: '0.75rem 1rem' }}>
+    <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>
               Enter your work email to join the chat:
             </p>
             <form onSubmit={handleEmailSubmit} className="chat-input-row">
@@ -127,6 +128,7 @@ const q = query(collection(db, 'messages-football'), orderBy('createdAt', 'asc')
                 onChange={e => setEmail(e.target.value)}
                 placeholder="your@company.com"
                 required
+                style={{ flex: 1, minWidth: 0, width: '100%' }}
               />
               <button className="send-btn" type="submit">Join</button>
             </form>
