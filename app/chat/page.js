@@ -128,7 +128,7 @@ const q = query(collection(db, 'messages-football'), orderBy('createdAt', 'asc')
                 onChange={e => setEmail(e.target.value)}
                 placeholder="your@company.com"
                 required
-                style={{ flex: 1, minWidth: 0, width: '100%' }}
+                style={{ flex: 1, minWidth: 0, width: '100%', padding: '0.6rem 0.75rem', fontSize: '1rem' }}
               />
               <button className="send-btn" type="submit">Join</button>
             </form>
