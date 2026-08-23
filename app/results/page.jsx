@@ -99,8 +99,8 @@ export default function ResultsPage() {
         const teamIds = favourites.map(t => t.id);
         const currentSeason = new Date() >= new Date('2026-08-21') ? '2026' : '2025';
         const url = selectedTeam === 'all'
-  ? `/api/matches?teamIds=${teamIds.join(',')}&status=FINISHED&season=2025`
-  : `/api/matches?teamId=${selectedTeam}&status=FINISHED&season=2025`;
+  ? `/api/matches?teamIds=${teamIds.join(',')}&status=FINISHED&season=${currentSeason}`
+  : `/api/matches?teamId=${selectedTeam}&status=FINISHED&season=${currentSeason}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch results');
         const data = await res.json();
