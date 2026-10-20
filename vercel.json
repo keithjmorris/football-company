@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/:path*", "destination": "https://football-tracker-blue.vercel.app/", "permanent": false }
+  ]
+}
